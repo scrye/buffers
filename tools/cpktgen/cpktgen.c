@@ -13,14 +13,14 @@ int main(int argc, char * argv[]) {
 
 	int dst = socket(AF_INET, SOCK_DGRAM, 0);
 	if (dst < 0) {
-		perror("Unable to create UDP socket\n");
+		perror("Unable to create UDP socket");
 		exit(1);
 	}
 
 	unsigned long addr;
 	rc = inet_pton(AF_INET, "169.254.2.254", &addr);
 	if (rc <= 0) {
-		perror("Unable to parse address\n");
+		perror("Unable to parse address");
 		exit(1);
 	}
 
@@ -31,22 +31,18 @@ int main(int argc, char * argv[]) {
 			.s_addr = addr
 		}
 	};
-	rc = connect(dst, (struct sockaddr*)&sockaddr, sizeof(sockaddr));
-	if (rc < 0) {
-		perror("Unable to connect to destination\n");
-		exit(1);
-	}
 
 	char * buffer = malloc(1280);
 	if (buffer == NULL) {
-		perror("Unable to allocate memory\n");
+		perror("Unable to allocate memory");
 		exit(1);
 	}
 
 	while (1) {
-		ssize_t s = send(dst, buffer, 1280, 0);	
+		ssize_t s = sendto(dst, buffer, 1280, 0, (struct sockaddr*)&sockaddr,
+				sizeof(sockaddr));
 		if (s < 0) {
-			perror("Unable to send datagram\n");
+			perror("Unable to send datagram");
 			exit(1);
 		}
 	}
