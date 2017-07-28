@@ -12,7 +12,7 @@
 int main(int argc, char * argv[]) {
 	int rc;
 
-	int dst = socket(AF_INET, SOCK_DGRAM, 0);
+	int dst = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
 	if (dst < 0) {
 		perror("Unable to create UDP socket");
 		exit(1);
@@ -27,17 +27,11 @@ int main(int argc, char * argv[]) {
 
 	struct sockaddr_in sockaddr = {
 		.sin_family = AF_INET,
-		.sin_port = 60000,
+		.sin_port = htons(0x0800),
 		.sin_addr = {
 			.s_addr = addr
 		}
 	};
-
-	char * buffer = malloc(1280);
-	if (buffer == NULL) {
-		perror("Unable to allocate memory");
-		exit(1);
-	}
 
 	int n = 100;
 	struct mmsghdr *msgvec = calloc(n, sizeof(struct mmsghdr));
@@ -58,6 +52,12 @@ int main(int argc, char * argv[]) {
 		iovec->iov_len = 1280;
 		msgvec[i].msg_hdr.msg_iov = iovec;
 		msgvec[i].msg_hdr.msg_iovlen = 1;
+
+		struct udphdr * udphdr = iovec->iov_base;
+		udphdr->dest = htons(60000);
+		udphdr->source = htons(0);
+		udphdr->len = htons(1280);
+		udphdr->check = 0;
 	}
 
 	while (1) {

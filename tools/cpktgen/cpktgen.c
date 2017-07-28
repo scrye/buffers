@@ -26,7 +26,7 @@ int main(int argc, char * argv[]) {
 
 	struct sockaddr_in sockaddr = {
 		.sin_family = AF_INET,
-		.sin_port = 60000,
+		.sin_port = htons(60000),
 		.sin_addr = {
 			.s_addr = addr
 		}
