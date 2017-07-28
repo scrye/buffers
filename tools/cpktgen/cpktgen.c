@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -12,14 +13,14 @@ int main(int argc, char * argv[]) {
 
 	int dst = socket(AF_INET, SOCK_DGRAM, 0);
 	if (dst < 0) {
-		fprintf(stderr, "Unable to create UDP socket\n");
+		perror("Unable to create UDP socket\n");
 		exit(1);
 	}
 
 	unsigned long addr;
 	rc = inet_pton(AF_INET, "169.254.2.254", &addr);
 	if (rc <= 0) {
-		fprintf(stderr, "Unable to parse address\n");
+		perror("Unable to parse address\n");
 		exit(1);
 	}
 
@@ -32,20 +33,20 @@ int main(int argc, char * argv[]) {
 	};
 	rc = connect(dst, (struct sockaddr*)&sockaddr, sizeof(sockaddr));
 	if (rc < 0) {
-		fprintf(stderr, "Unable to connect to destination\n");
+		perror("Unable to connect to destination\n");
 		exit(1);
 	}
 
 	char * buffer = malloc(1280);
 	if (buffer == NULL) {
-		fprintf(stderr, "Unable to allocate memory\n");
+		perror("Unable to allocate memory\n");
 		exit(1);
 	}
 
 	while (1) {
 		ssize_t s = send(dst, buffer, 1280, 0);	
 		if (s < 0) {
-			fprintf(stderr, "Unable to send datagram\n");
+			perror("Unable to send datagram\n");
 			exit(1);
 		}
 	}
