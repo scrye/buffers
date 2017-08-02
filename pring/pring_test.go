@@ -90,3 +90,98 @@ func TestWrite(t *testing.T) {
 	*/
 
 }
+
+// Benchmarks
+
+// Copy 100MB between two goroutines with 1500byte packets
+
+func spoolReceiver(b *testing.B, sp *SPool, length int) {
+	read := 0
+	dest := make([]byte, 1500)
+	for read < length {
+		buffer := <-sp.c
+		n := copy(dest, buffer)
+		read += n
+		sp.Put(buffer)
+	}
+
+}
+
+func BenchmarkSPool(b *testing.B) {
+	// Generate 100MB
+	length := 100 * (1 << 20)
+	data := make([]byte, length)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sp := NewSPool(1024)
+		go spoolReceiver(b, sp, length)
+		written := 0
+		for written < length {
+			buffer := sp.Get()
+			n := copy(buffer, data[written:])
+			written += n
+			sp.c <- buffer
+		}
+	}
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}
+
+func pringReceiver(b *testing.B, pr *PRing, length int) {
+	read := 0
+	//dest := make([]byte, 1500)
+	// This simulates the extra copy needed when extracting data from the PRing
+	// in normal applications
+	//extra := make([]byte, 1<<18)
+	for read < length {
+		/*
+			n, err := pr.Read(extra)
+			if err != nil {
+				fmt.Println("Read error", err)
+			}
+		*/
+
+		// We copied a big chunk, now packetize it and copy it to destination
+		/*
+			copied := 0
+			for copied < n {
+				n2 := copy(dest, extra[copied:])
+				copied += n2
+			}
+		*/
+
+		//read += n
+		read += 1500
+	}
+}
+
+func BenchmarkPRing(b *testing.B) {
+	// Generate 100MB
+	length := 100 * (1 << 20)
+	//data := make([]byte, length)
+	pr := NewPRing(1 << 18)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go pringReceiver(b, pr, length)
+		written := 0
+		for written < length {
+			//maxWrite := min(1500, len(data)-written)
+			//n, err := pr.Write(data[written : written+maxWrite])
+			/*
+				if err != nil {
+					fmt.Println("Write error", err)
+				}
+			*/
+			//written += n
+			written += 1500
+		}
+	}
+}

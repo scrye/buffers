@@ -18,7 +18,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	unsigned long addr;
-	rc = inet_pton(AF_INET, "169.254.2.254", &addr);
+	rc = inet_pton(AF_INET, "127.0.0.1", &addr);
 	if (rc <= 0) {
 		perror("Unable to parse address");
 		exit(1);
