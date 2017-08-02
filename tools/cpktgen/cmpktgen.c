@@ -1,5 +1,6 @@
 
 #define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -12,7 +13,7 @@
 int main(int argc, char * argv[]) {
 	int rc;
 
-	int dst = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
+	int dst = socket(AF_INET, SOCK_DGRAM, 0);
 	if (dst < 0) {
 		perror("Unable to create UDP socket");
 		exit(1);
@@ -52,12 +53,6 @@ int main(int argc, char * argv[]) {
 		iovec->iov_len = 1280;
 		msgvec[i].msg_hdr.msg_iov = iovec;
 		msgvec[i].msg_hdr.msg_iovlen = 1;
-
-		struct udphdr * udphdr = iovec->iov_base;
-		udphdr->dest = htons(60000);
-		udphdr->source = htons(0);
-		udphdr->len = htons(1280);
-		udphdr->check = 0;
 	}
 
 	while (1) {
